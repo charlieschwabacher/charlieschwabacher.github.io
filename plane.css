@@ -1,0 +1,40 @@
+html {
+  height: 100%;
+  width: 100%;
+  background: radial-gradient(ellipse at center, #333 0%, #111 100%);
+}
+body {
+  margin: 0;
+}
+canvas {
+  position: absolute;
+  z-index: 1;
+  opacity: 0.6;
+}
+h1, a {
+  position: absolute;
+  z-index: 2;
+  font-family: 'Helvetica Neue';
+  color: #f7f7f7;
+  text-decoration: none;
+  font-weight: 100;
+}
+h1 {
+  font-size: 42px;
+  width: 320px;
+  top: 50%;
+  left: 50%;
+  margin: -24px 0 0 -160px;
+  text-align: center;
+  text-shadow: 0 0 3px white;
+}
+a {
+  bottom: 0;
+  right: 0;
+  color: #999;
+  text-shadow: 0 0 2px #999;
+  margin: 24px;
+}
+a:hover {
+  color: #aaa;
+}
