@@ -1,8 +1,8 @@
-var size = 90,
+var size = 80,
 lightHeight = 55,
 cameraWaveHeight = 0.03,
 cameraWaveSpeed = 0.3,
-vertexWaveHeight = 0.2,
+vertexWaveHeight = 2.5,
 vertexWaveSpeed = 0.8,
 xRippleWaveHeight = 0.16,
 xRippleWaveSize = 4.2,
@@ -16,7 +16,7 @@ zRippleWaveSpeed = 0.8,
 updateCallbacks = [],
 renderer  = new THREE.WebGLRenderer(),
 scene = new THREE.Scene(),
-camera  = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.01, 5000 );
+camera  = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 5000 );
 
 var cameraheight;
 
@@ -25,7 +25,7 @@ document.body.appendChild( renderer.domElement );
 window.onresize = function() {
   renderer.setSize( window.innerWidth, window.innerHeight );
   camera.aspect = window.innerWidth / window.innerHeight;
-  cameraHeight = size / 2 + size / 2 / Math.tan(Math.PI / 180 * camera.fov / 2) * (1 - cameraWaveHeight) * 0.5;
+  cameraHeight = size / 2 + size / 2 / Math.tan(Math.PI / 180 * camera.fov / 2) * (1 - cameraWaveHeight) * 0.34;
   camera.updateProjectionMatrix();
 }
 window.onresize();
@@ -36,7 +36,7 @@ light.position.set( 0, 0, lightHeight + size / 2 );
 scene.add( light );
 
 // add planet object
-var geometry = new THREE.SphereGeometry(size / 2, size, size, 0, Math.PI, 0, Math.PI);
+var geometry = new THREE.SphereGeometry(size / 2, size, size, 0.0 * Math.PI, 1 * Math.PI, 0.0 * Math.PI, 1 * Math.PI);
 geometry.dyanmic = true;
 
 // vertex updaters
@@ -76,7 +76,7 @@ scene.add(mesh);
 // add update callback to compute mesh normals after each update
 updateCallbacks.push(function() {
   geometry.verticesNeedUpdate = true;
-  //geometry.normalsNeedUpdate = true;
+  geometry.normalsNeedUpdate = true;
   geometry.computeFaceNormals();
   geometry.computeVertexNormals();
 });
