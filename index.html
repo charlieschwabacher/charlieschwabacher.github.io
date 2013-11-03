@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<script src='vendor/three.js'></script>
+<body>
+<script>
+	var size = 150,
+	lightHeight = 7,
+	cameraWaveHeight = 0.03,
+	cameraWaveSpeed = 0.3,
+	vertexWaveHeight = 1.0,
+	vertexWaveSpeed = 1.2,
+	vertexSpeedVariation = 0,
+	rippleWaveHeight = 0.1,
+	rippleWaveSize = 1.2,
+	rippleWaveSpeed = 0.45,
+	curveSpeed = 0.0,
+	curveScale = 1 / 1500,
+	curveExponent = 2,
+	updateCallbacks	= [],
+	renderer	= new THREE.WebGLRenderer(),
+	scene	= new THREE.Scene(),
+	camera	= new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 5000 );
+  
+	var cameraheight;
+
+	document.body.appendChild( renderer.domElement );
+
+	window.onresize = function() {
+		renderer.setSize( window.innerWidth, window.innerHeight );
+		camera.aspect = window.innerWidth / window.innerHeight;
+		cameraHeight = Math.min(camera.aspect, 1 / camera.aspect) * size / 2 / Math.tan(Math.PI / 180 * camera.fov / 2) * (1 - cameraWaveHeight) - rippleWaveHeight - vertexWaveHeight;
+		camera.updateProjectionMatrix();
+	}
+	window.onresize();
+
+	// add a light source
+	var light = new THREE.PointLight( 0xffffff );
+	light.position.set( 0, 0, lightHeight );
+	scene.add( light );
+
+	
+	// add an object and make it move
+	var geometry	= new THREE.Geometry();
+	geometry.dyanmic = true;
+	
+	// create vertices and updaters
+	for (var i = 0, len = size*size; i < len; i++) {
+		var ix = i % size,
+				iy = Math.floor(i / size);
+				x = -(size-1)/2 + ix,
+				y = -(size-1)/2 + iy;
+				
+		// create vector, vertex, and udpate callback
+		(function(vertexOffset) {
+			var vector = new THREE.Vector3(x, y, Math.sin(vertexOffset))
+
+			var distance = Math.sqrt(x * x + y * y) * rippleWaveSize;
+			var radius = (size - 1) / 2
+			var rippleOffset = distance / radius * 2 * Math.PI
+
+			updateCallbacks.push(function(delta, now){
+				vector.z = Math.cos(now * curveSpeed) * Math.pow(distance, curveExponent) * curveScale + 
+									 Math.sin(now * vertexWaveSpeed + vertexOffset) * vertexWaveHeight +
+				           Math.sin(now * rippleWaveSpeed + rippleOffset) * rippleWaveHeight;
+			});
+
+			geometry.vertices.push(vector);
+		})(Math.random() * 2 * Math.PI);
+
+		// add faces for triangles w/ right angle at their top left
+		if (ix < size - 1 && iy < size - 1) {
+			geometry.faces.push(new THREE.Face3(i, i + 1, i + size));
+		}
+
+		// add faces for triangles w/ right angle at their bottom right
+		if (ix > 0 && iy > 0) {
+			geometry.faces.push(new THREE.Face3(i, i - 1, i - size));
+		}
+	}
+
+	// add update callback to compute mesh normals after each update
+	updateCallbacks.push(function() {
+		geometry.verticesNeedUpdate = true;
+		geometry.computeFaceNormals();
+		geometry.computeVertexNormals();
+	});
+
+	// create material and mesh, add to scene
+	var material	= new THREE.MeshPhongMaterial({color: 0xffffff});
+	var mesh	= new THREE.Mesh(geometry, material);
+	scene.add(mesh);
+	
+	// camera controls
+	updateCallbacks.push(function(delta, now){
+		camera.position.z = cameraHeight + cameraHeight * cameraWaveHeight * Math.sin(now * cameraWaveSpeed);
+		camera.lookAt( scene.position )
+	})
+	
+	// render the scene
+	updateCallbacks.push(function(){
+		renderer.render(scene, camera);		
+	});
+
+	// update loop
+	var lastTimeMsec = null
+  var animate = function (nowMsec) {
+		requestAnimationFrame(animate);
+		
+		// measure time
+		lastTimeMsec	= lastTimeMsec || nowMsec-1000/60
+		var deltaMsec	= Math.min(200, nowMsec - lastTimeMsec)
+		lastTimeMsec	= nowMsec
+
+		// call each update function
+		updateCallbacks.forEach(function(callback){
+			callback(deltaMsec/1000, nowMsec/1000)
+		});
+	};
+
+	
+	// start loop
+	requestAnimationFrame(animate);
+
+</script>
+<style>
+	html {
+  	height: 100%;
+  	width: 100%;
+  	background: radial-gradient(ellipse at center, #444 0%, #111 100%);
+	}
+  body {
+  	margin: 0;
+  }
+	canvas {
+		position: absolute;
+		z-index: 1;
+		opacity: 0.5;
+	}
+	h1, a {
+		position: absolute;
+		z-index: 2;
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+		font-family: 'Helvetica Neue';
+		color: #f7f7f7;
+		text-decoration: none;
+		font-weight: 100;
+	}
+	h1 {
+		font-size: 42px;
+		width: 320px;
+		top: 50%;
+		left: 50%;
+		margin: -49px 0 0 -160px;
+		text-align: center;
+    text-shadow: 0 0 3px white;
+	}
+	a {
+		bottom: 0;
+		right: 0;
+		color: #999;
+		text-shadow: 0 0 2px #aaa;
+		padding: 24px;
+	}
+	a:hover {
+		color: #aaa;
+	}
+</style>
+<h1>CHARLIE SCHWABACHER</h1>
+<a href="mailto:charlieschwabacher@gmail.com">charlieschwabacher@gmail.com</a>
+</body>
