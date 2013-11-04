@@ -1,22 +1,7 @@
-var size = 80,
-lightHeight = 55,
-cameraWaveHeight = 0.03,
-cameraWaveSpeed = 0.3,
-vertexWaveHeight = 2.5,
-vertexWaveSpeed = 0.8,
-xRippleWaveHeight = 0.16,
-xRippleWaveSize = 4.2,
-xRippleWaveSpeed = 0.29,
-yRippleWaveHeight = 0.3,
-yRippleWaveSize = 3.0,
-yRippleWaveSpeed = 0.69,
-zRippleWaveHeight = -0.2,
-zRippleWaveSize = 2.0,
-zRippleWaveSpeed = 0.8,
-updateCallbacks = [],
+var updateCallbacks = [],
 renderer  = new THREE.WebGLRenderer(),
 scene = new THREE.Scene(),
-camera  = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 5000 );
+camera  = new THREE.PerspectiveCamera(cameraFov, window.innerWidth / window.innerHeight, 0.01, 5000 );
 
 var cameraheight;
 
@@ -25,7 +10,7 @@ document.body.appendChild( renderer.domElement );
 window.onresize = function() {
   renderer.setSize( window.innerWidth, window.innerHeight );
   camera.aspect = window.innerWidth / window.innerHeight;
-  cameraHeight = size / 2 + size / 2 / Math.tan(Math.PI / 180 * camera.fov / 2) * (1 - cameraWaveHeight) * 0.34;
+  cameraHeight = size / 2 + size / 2 / Math.tan(Math.PI / 180 * camera.fov / 2) * (1 - cameraWaveHeight) * cameraHeightScale;
   camera.updateProjectionMatrix();
 }
 window.onresize();
@@ -68,7 +53,9 @@ for (var i = 0, len = geometry.vertices.length; i < len; i++) {
 var material  = new THREE.MeshLambertMaterial({color: 0xCCCCCC}),
     mesh  = new THREE.Mesh(geometry, material);
 
-//material.shading = THREE.FlatShading;
+if (useFlatShading) {
+  material.shading = THREE.FlatShading;
+}
 
 scene.add(mesh);
 
@@ -76,7 +63,11 @@ scene.add(mesh);
 // add update callback to compute mesh normals after each update
 updateCallbacks.push(function() {
   geometry.verticesNeedUpdate = true;
-  geometry.normalsNeedUpdate = true;
+
+  if (updateNormals) {
+    geometry.normalsNeedUpdate = true;
+  }
+  
   geometry.computeFaceNormals();
   geometry.computeVertexNormals();
 });
